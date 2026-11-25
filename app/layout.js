@@ -1,8 +1,12 @@
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
-
-export const metadata = { title: "Crew – My jobs", description: "Assigned jobs, delivery and return counts" };
-export const viewport = { width: "device-width", initialScale: 1, themeColor: "#0f3d2e" };
+export const metadata = {
+  title: "Luxora Staff Login Portal",
+  description: "Luxora staff portal: your jobs, deliveries and return counts.",
+};
+export const viewport = {
+  themeColor: "#0f0d1a",
+};
 
 export default function RootLayout({ children }) {
   return (

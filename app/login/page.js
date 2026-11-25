@@ -5,6 +5,8 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useAuth } from "@/context/AuthContext";
 
+const LOGO_SRC = "/logo.png"; // file in the public folder (project root)
+
 const friendly = (code) =>
   ({
     "auth/invalid-credential": "Email or password is wrong.",
@@ -50,13 +52,32 @@ export default function Login() {
   return (
     <div className="login">
       <div className="login-hero">
-        <div className="mark" aria-hidden="true">
-          <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M3 7l9-4 9 4-9 4-9-4z" /><path d="M3 7v10l9 4 9-4V7" /><path d="M12 11v10" />
-          </svg>
+        <div
+          className="mark"
+          style={{
+            width: 84,
+            height: 84,
+            borderRadius: "50%",
+            overflow: "hidden",
+            background: "#fff",
+            boxShadow: "0 4px 14px rgba(0,0,0,0.25)",
+            border: "3px solid rgba(255,255,255,0.9)",
+          }}
+        >
+          <img
+            src={LOGO_SRC}
+            alt="Luxora"
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              borderRadius: "50%",
+              display: "block",
+            }}
+          />
         </div>
-        <h1>Crew</h1>
-        <p>Your jobs, deliveries and return counts.</p>
+        <h1>Luxora</h1>
+        <p>Staff Login Portal</p>
       </div>
 
       <form className="login-card" onSubmit={submit}>
