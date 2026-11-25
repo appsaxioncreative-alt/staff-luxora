@@ -5,8 +5,7 @@ import { auth } from "@/lib/firebase";
 import { apiFetch } from "@/lib/api";
 import { isActive } from "@/lib/format";
 import { useAuth } from "@/context/AuthContext";
-
-const initials = (n = "") => n.split(/\s+/).filter(Boolean).slice(0, 2).map((p) => p[0].toUpperCase()).join("") || "?";
+import ProfilePhoto from "@/components/ProfilePhoto";
 
 const pwError = (code) =>
   ({
@@ -78,7 +77,7 @@ export default function ProfilePage() {
   return (
     <>
       <header className="top profile-top">
-        <div className="avatar" aria-hidden="true">{initials(worker.name)}</div>
+        <ProfilePhoto worker={worker} onChange={updateWorker} />
         <div>
           <h1>{worker.name}</h1>
           <p className="muted">{worker.email}</p>

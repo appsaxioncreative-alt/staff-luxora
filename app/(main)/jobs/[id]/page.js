@@ -16,7 +16,7 @@ export default function JobPage() {
   const [job, setJob] = useState(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  const [confirm, setConfirm] = useState(null); // "deliver" | "unload"
+  const [confirm, setConfirm] = useState(null); // "unload"
 
   const load = useCallback(async () => {
     try {
@@ -32,6 +32,11 @@ export default function JobPage() {
     setBusy(true);
     setError("");
     try {
+      // Delivered + unloaded are now one step. If the job is still at "assigned",
+      // record the delivery silently first so the backend order stays valid.
+      if (action === "unload" && job.fieldStage === "assigned") {
+        await apiFetch(`/api/jobs/${id}`, { method: "PATCH", body: JSON.stringify({ action: "deliver" }) });
+      }
       const d = await apiFetch(`/api/jobs/${id}`, { method: "PATCH", body: JSON.stringify({ action, counts }) });
       setJob(d.job);
       setConfirm(null);
@@ -80,17 +85,10 @@ export default function JobPage() {
       {error && <div className="msg err" role="alert">{error}</div>}
 
       {/* ---------- what to do next ---------- */}
-      {!closed && stage === "assigned" && (
-        <section className="card action">
-          <h2>Next: deliver</h2>
-          <p>Tap when the items have reached the venue.</p>
-          <button className="btn" onClick={() => setConfirm("deliver")}>Mark as delivered</button>
-        </section>
-      )}
-      {!closed && stage === "delivered" && (
+      {!closed && (stage === "assigned" || stage === "delivered") && (
         <section className="card action">
           <h2>Next: unload</h2>
-          <p>Tap when everything is unloaded at the venue.</p>
+          <p>Tap when the items have reached the venue and are unloaded.</p>
           <button className="btn" onClick={() => setConfirm("unload")}>Mark as unloaded</button>
         </section>
       )}
@@ -143,11 +141,11 @@ export default function JobPage() {
       )}
 
       {/* ---------- history ---------- */}
-      {(job.fieldLog.delivered || job.fieldLog.unloaded || job.fieldLog.returned) && (
+      {(job.fieldLog.unloaded || job.fieldLog.returned) && (
         <section className="card">
           <h2>History</h2>
           <ul className="history">
-            {[["Delivered", job.fieldLog.delivered], ["Unloaded", job.fieldLog.unloaded], ["Returned to base", job.fieldLog.returned]]
+            {[["Unloaded", job.fieldLog.unloaded], ["Returned to base", job.fieldLog.returned]]
               .filter(([, e]) => e)
               .map(([label, e]) => (
                 <li key={label}><strong>{label}</strong><span>{fmt(e.at)} by {e.by?.name}</span></li>
@@ -156,14 +154,15 @@ export default function JobPage() {
         </section>
       )}
 
-      {confirm === "deliver" && (
-        <ConfirmSheet title="Mark as delivered?" confirmLabel="Yes, delivered" busy={busy} onCancel={() => setConfirm(null)} onConfirm={() => act("deliver")}>
-          <p>This tells the office “{job.name}” has reached the venue.</p>
-        </ConfirmSheet>
-      )}
       {confirm === "unload" && (
-        <ConfirmSheet title="Mark as unloaded?" confirmLabel="Yes, unloaded" busy={busy} onCancel={() => setConfirm(null)} onConfirm={() => act("unload")}>
-          <p>Everything has been taken off the vehicle at the venue.</p>
+        <ConfirmSheet
+          title="Mark as unloaded?"
+          confirmLabel="Yes, unloaded"
+          busy={busy}
+          onCancel={() => setConfirm(null)}
+          onConfirm={() => act("unload")}
+        >
+          <p>“{job.name}” has reached the venue and everything is unloaded.</p>
         </ConfirmSheet>
       )}
     </>
